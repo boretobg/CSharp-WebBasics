@@ -1,63 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Chronometer
 {
     public class Chronometer : IChronometer
     {
-        private float milliseconds = 0;
-        private int seconds = 0;
-        private int minutes = 0;
-        private long current = 0;
+        private Stopwatch stopwatch = new Stopwatch();
+        private List<string> laps;
 
-        public string GetTime => throw new NotImplementedException();
+        public Chronometer()
+        {
+            laps = new List<string>();
+        }
 
-        public List<string> Laps => throw new NotImplementedException();
+        public string GetTime 
+            => string.Format("{0:mm\\:ss\\:ffff}", stopwatch.Elapsed);
+
+        public List<string> Laps 
+            => laps;
 
         public string Lap()
         {
-            return $"{minutes}:{seconds}:{current}";
+            var currentLap = GetTime;
+
+            laps.Add(currentLap);
+
+            return currentLap;
         }
 
-        public void Reset()
-        {
-            throw new NotImplementedException();
-        }
+        public void Reset() 
+            => stopwatch.Reset();
 
-        public void Start()
-        {
-            var stopwatch = new Stopwatch();
+        public void Start() 
+            => stopwatch.Start();
 
-            while (true)
-            {
-                while (seconds < 60)
-                {
-                    while (milliseconds < 1000)
-                    {
-                        stopwatch.Start();
-                        milliseconds++;
-                        current = stopwatch.ElapsedMilliseconds;
-                    }
-                    stopwatch.Restart();
-
-                    Thread.Sleep(1000);
-                    seconds++;
-                    milliseconds = 0;
-                }
-                
-                minutes++;
-                seconds = 0;
-            }
-        }
-
-        public void Stop()
-        {
-            throw new NotImplementedException();
-        }
+        public void Stop() 
+            => stopwatch.Stop();
     }
 }
