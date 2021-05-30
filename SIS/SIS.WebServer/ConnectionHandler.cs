@@ -19,7 +19,8 @@ namespace SIS.WebServer
 
         private readonly IServerRoutingTable serverRoutingTable;
 
-        public ConnectionHandler(Socket client, IServerRoutingTable serverRoutingTable)
+        public ConnectionHandler(
+            Socket client, IServerRoutingTable serverRoutingTable)
         {
             CoreValidator.ThrowIfNull(client, nameof(client));
             CoreValidator.ThrowIfNull(serverRoutingTable, nameof(serverRoutingTable));
@@ -28,7 +29,34 @@ namespace SIS.WebServer
             this.serverRoutingTable = serverRoutingTable;
         }
 
-        private IHttpRequest ReadRequest()
+        public async Task ProcessRequestAsync()
+        {
+            try
+            {
+                var httpRequest = await this.ReadRequest();
+
+                if (httpRequest != null)
+                {
+                    Console.WriteLine($"Processing: {httpRequest.RequestMethod} {httpRequest.Path}...");
+
+                    var httpResponse = this.HandleRequest(httpRequest);
+
+                    await this.PrepareResponse(httpResponse);
+                }
+            }
+            catch (BadRequestException e)
+            {
+                await this.PrepareResponse(new TextResult(e.ToString(), HttpResponseStatusCode.BadRequest));
+            }
+            catch (Exception e)
+            {
+                await this.PrepareResponse(new TextResult(e.ToString(), HttpResponseStatusCode.InternalServerError));
+            }
+
+            this.client.Shutdown(SocketShutdown.Both);
+        }
+
+        private async Task <IHttpRequest> ReadRequest()
         {
             // PARSE REQUEST FROM BYTE DATA
             var result = new StringBuilder();
@@ -36,7 +64,7 @@ namespace SIS.WebServer
 
             while (true)
             {
-                int numberOfBytesToRead = this.client.Receive(data.Array, SocketFlags.None);
+                int numberOfBytesToRead = await this.client.ReceiveAsync(data.Array, SocketFlags.None);
 
                 if (numberOfBytesToRead == 0)
                 {
@@ -60,11 +88,6 @@ namespace SIS.WebServer
             return new HttpRequest(result.ToString());
         }
 
-        internal Task ProcessRequestAsync()
-        {
-            throw new NotImplementedException();
-        }
-
         private IHttpResponse HandleRequest(IHttpRequest httpRequest)
         {
             // EXECUTE FUNCTION FOR CURRENT REQUEST -> RETURNS RESPONSE
@@ -76,40 +99,12 @@ namespace SIS.WebServer
             return this.serverRoutingTable.Get(httpRequest.RequestMethod, httpRequest.Path).Invoke(httpRequest);
         }
 
-        private void PrepareResponse(IHttpResponse httpResponse)
+        private async Task PrepareResponse(IHttpResponse httpResponse)
         {
             // PREPARES RESPONSE -> MAPS IT TO BYTE DATA
             byte[] byteSegments = httpResponse.GetBytes();
 
-            this.client.Send(byteSegments, SocketFlags.None);
-        }
-
-        public void ProcessRequest()
-        {
-            IHttpResponse httpResponse = null;
-
-            try
-            {
-                IHttpRequest httpRequest = this.ReadRequest();
-
-                if (httpRequest != null)
-                {
-                    Console.WriteLine($"Processing: {httpRequest.RequestMethod} {httpRequest.Path}...");
-
-                    httpResponse = this.HandleRequest(httpRequest);
-                }
-            }
-            catch (BadRequestException e)
-            {
-                httpResponse = new TextResult(e.Message, HttpResponseStatusCode.BadRequest);
-            }
-            catch (Exception e)
-            {
-                httpResponse = new TextResult(e.Message, HttpResponseStatusCode.InternalServerError);
-            }
-
-            this.PrepareResponse(httpResponse);
-            this.client.Shutdown(SocketShutdown.Both);
+            await this.client.SendAsync(byteSegments, SocketFlags.None);
         }
     }
 }
