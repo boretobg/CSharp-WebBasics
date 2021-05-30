@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using SIS.HTTP.Common;
 using SIS.HTTP.Enums;
 using SIS.HTTP.Exceptions;
@@ -57,6 +58,11 @@ namespace SIS.WebServer
             }
 
             return new HttpRequest(result.ToString());
+        }
+
+        internal Task ProcessRequestAsync()
+        {
+            throw new NotImplementedException();
         }
 
         private IHttpResponse HandleRequest(IHttpRequest httpRequest)
