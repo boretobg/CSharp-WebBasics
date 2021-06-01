@@ -1,7 +1,9 @@
 ﻿namespace WebServer
 {
     using System.Threading.Tasks;
-    public class Program
+    using WebServer.Server;
+
+    public class StartUp
     {
         public static async Task Main()
         {
