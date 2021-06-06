@@ -5,6 +5,6 @@
         OK = 200,
         Found = 302,
         BadRequest = 400,
-        NotFond = 404
+        NotFound = 404
     }
 }
