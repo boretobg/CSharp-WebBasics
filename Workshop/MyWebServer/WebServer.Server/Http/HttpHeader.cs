@@ -4,6 +4,12 @@ namespace WebServer.Server.Http
 {
     public class HttpHeader
     {
+        public const string ContentType = "Content-Type";
+        public const string ContentLength = "ContentLength";
+        public const string Server = "Server";
+        public const string Date = "Date";
+        public const string Location = "Location";
+
         public HttpHeader(string name, string value)
         {
             Guard.AgainstNull(name, nameof(name));
@@ -19,6 +25,5 @@ namespace WebServer.Server.Http
         public override string ToString()
             => $"{this.Name}: {this.Value}";
             
-        
     }
 }

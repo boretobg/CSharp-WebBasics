@@ -14,6 +14,8 @@
 
         static void Main() { }
 
+        private readonly RoutingTable routingTable;
+
         public HttpServer(string ipAddress, int port)
         {
             this.ipAddress = IPAddress.Parse(ipAddress);

@@ -2,6 +2,7 @@
 namespace WebServer.Server.Controllers
 {
     using WebServer.Server.Http;
+    using WebServer.Server.Responses;
 
     public abstract class Controller
     {
@@ -20,5 +21,16 @@ namespace WebServer.Server.Controllers
         protected HttpResponse Redirect(string location)
             => new RedirectResponse(location);
 
+        protected HttpResponse View([CallerMemberName] string viewName = "")
+            => new ViewResponse(viewName, this.GetControllerName(), null);
+
+        protected HttpResponse View(string viewName, object model)
+        => new ViewResponse(viewName, this.GetControllerName(), model);
+
+        protected HttpResponse View(object model, [CallerMemberName] string viewName = "")
+            => new ViewResponse(viewName, this.GetControllerName(), model);
+
+        private string GetControllerName()
+            => this.GetType().Name.Replace(nameof(Controller), string.Empty);
     }
 }
