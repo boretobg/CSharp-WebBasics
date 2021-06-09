@@ -2,6 +2,7 @@
 {
     using System;
     using WebServer.Server.Http;
+    using WebServer.Server.Routing;
 
     public static class RoutingTableExtensions
     {

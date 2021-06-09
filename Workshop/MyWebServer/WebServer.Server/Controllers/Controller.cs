@@ -1,6 +1,7 @@
 ﻿
 namespace WebServer.Server.Controllers
 {
+    using System.Runtime.CompilerServices;
     using WebServer.Server.Http;
     using WebServer.Server.Responses;
 
