@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using WebServer.Server.Common;
     using WebServer.Server.Http;
     using WebServer.Server.Responses;
@@ -18,7 +19,10 @@
             [HttpMethod.Delete] = new(),
         };
 
-        public IRoutingTable Map(HttpMethod method, string path, HttpResponse response)
+        public IRoutingTable Map(
+            HttpMethod method,
+            string path,
+            HttpResponse response)
         {
             Guard.AgainstNull(response, nameof(response));
 
@@ -35,13 +39,17 @@
             return this;
         }
 
-        public IRoutingTable MapGet(string path, HttpResponse response)
+        public IRoutingTable MapGet(
+            string path,
+            HttpResponse response)
             => MapGet(path, request => response);
 
         public IRoutingTable MapGet(string path, Func<HttpRequest, HttpResponse> responseFunction)
             => Map(HttpMethod.Get, path, responseFunction);
 
-        public IRoutingTable MapPost(string path, HttpResponse response)
+        public IRoutingTable MapPost(
+            string path,
+            HttpResponse response)
             => MapPost(path, request => response);
 
         public IRoutingTable MapPost(string path, Func<HttpRequest, HttpResponse> responseFunction)
@@ -52,14 +60,44 @@
             var requestMethod = request.Method;
             var requestPath = request.Path.ToLower();
 
-            if (!this.routes.ContainsKey(requestMethod) || !this.routes[requestMethod].ContainsKey(requestPath))
+            if (!this.routes.ContainsKey(requestMethod)
+                || !this.routes[requestMethod].ContainsKey(requestPath))
             {
-                return new NotFoundResponse();
+                return new HttpResponse(HttpStatusCode.NotFound);
             }
 
             var responseFunction = this.routes[requestMethod][requestPath];
 
             return responseFunction(request);
+        }
+
+        public IRoutingTable MapStaticFiles(string folder = Settings.StaticFilesRootFolder)
+        {
+            var currentDirectory = Directory.GetCurrentDirectory();
+            var staticFilesFolder = Path.Combine(currentDirectory, folder);
+            var staticFiles = Directory.GetFiles(
+                staticFilesFolder,
+                "*.*",
+                SearchOption.AllDirectories);
+
+            foreach (var file in staticFiles)
+            {
+                var relativePath = Path.GetRelativePath(staticFilesFolder, file);
+
+                var urlPath = "/" + relativePath.Replace("\\", "/");
+
+                this.MapGet(urlPath, request =>
+                {
+                    var content = File.ReadAllBytes(file);
+                    var fileExtension = Path.GetExtension(file).Trim('.');
+                    var contentType = HttpContentType.GetByFileExtension(fileExtension);
+
+                    return new HttpResponse(HttpStatusCode.OK)
+                        .SetContent(content, contentType);
+                });
+            }
+
+            return this;
         }
     }
 }
