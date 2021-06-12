@@ -3,35 +3,62 @@ namespace WebServer.Server.Controllers
 {
     using System.Runtime.CompilerServices;
     using WebServer.Server.Http;
-    using WebServer.Server.Responses;
+    using WebServer.Server.Identity;
+    using WebServer.Server.Results;
 
     public abstract class Controller
     {
-        protected Controller(HttpRequest request)
-            => this.Request = request;
+        public const string UserSessionKey = "AuthenticatedUserId";
 
+        private UserIdentity userIdentity;
 
-        protected HttpRequest Request { get; private init; }
+        protected HttpRequest Request { get; init; }
 
-        protected HttpResponse Text(string text)
-            => new TextResponse(text);
+        protected HttpResponse Response { get; private init; } = new HttpResponse(HttpStatusCode.OK);
 
-        protected HttpResponse Html(string html)
-            => new HtmlResponse(html);
+        protected UserIdentity User
+        {
+            get
+            {
+                if (this.userIdentity == null)
+                {
+                    this.userIdentity = this.Request.Session.ContainsKey(UserSessionKey)
+                        ? new UserIdentity { Id = this.Request.Session[UserSessionKey] }
+                        : new();
+                }
 
-        protected HttpResponse Redirect(string location)
-            => new RedirectResponse(location);
+                return this.userIdentity;
+            }
+        }
 
-        protected HttpResponse View([CallerMemberName] string viewName = "")
-            => new ViewResponse(viewName, this.GetControllerName(), null);
+        protected void SignIn(string userId)
+        {
+            this.Request.Session[UserSessionKey] = userId;
+            this.userIdentity = new UserIdentity { Id = userId };
+        }
 
-        protected HttpResponse View(string viewName, object model)
-        => new ViewResponse(viewName, this.GetControllerName(), model);
+        protected void SignOut()
+        {
+            this.Request.Session.Remove(UserSessionKey);
+            this.userIdentity = new();
+        }
 
-        protected HttpResponse View(object model, [CallerMemberName] string viewName = "")
-            => new ViewResponse(viewName, this.GetControllerName(), model);
+        protected ActionResult Text(string text)
+            => new TextResult(this.Response, text);
 
-        private string GetControllerName()
-            => this.GetType().Name.Replace(nameof(Controller), string.Empty);
+        protected ActionResult Html(string html)
+            => new HtmlResult(this.Response, html);
+
+        protected ActionResult Redirect(string location)
+            => new RedirectResult(this.Response, location);
+
+        protected ActionResult View([CallerMemberName] string viewName = "")
+            => new ViewResult(this.Response, viewName, this.GetType().GetControllerName(), null);
+
+        protected ActionResult View(string viewName, object model)
+            => new ViewResult(this.Response, viewName, this.GetType().GetControllerName(), model);
+
+        protected ActionResult View(object model, [CallerMemberName] string viewName = "")
+            => new ViewResult(this.Response, viewName, this.GetType().GetControllerName(), model);
     }
 }

@@ -5,7 +5,6 @@
     using System.IO;
     using WebServer.Server.Common;
     using WebServer.Server.Http;
-    using WebServer.Server.Responses;
 
     public class RoutingTable : IRoutingTable
     {
