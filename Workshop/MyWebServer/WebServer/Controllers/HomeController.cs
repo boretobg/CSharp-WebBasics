@@ -1,16 +1,19 @@
 ﻿namespace WebServer.Controllers
 {
+    using System;
     using WebServer.Server.Controllers;
     using WebServer.Server.Http;
 
     public class HomeController : Controller
     {
-        public HomeController(HttpRequest request) : base(request)
-        {
-        }
+        public HttpResponse Index() => Text("Hello from Ivo!");
 
-        public HttpResponse Index() => Text("Hellp from Bobby!");
-        public HttpResponse LocalRedirect() => Redirect("/Cats");
-        public HttpResponse ToSoftuni() => Redirect("https://softuni.bg");
+        public HttpResponse LocalRedirect() => Redirect("/Animals/Cats");
+
+        public HttpResponse ToSoftUni() => Redirect("https://softuni.bg");
+
+        public HttpResponse StaticFiles() => View();
+
+        public HttpResponse Error() => throw new InvalidOperationException("Invalid action!");
     }
 }

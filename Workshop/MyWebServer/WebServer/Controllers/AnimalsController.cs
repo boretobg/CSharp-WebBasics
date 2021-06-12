@@ -6,10 +6,6 @@
 
     public class AnimalsController : Controller
     {
-        public AnimalsController(HttpRequest request) : base (request)
-        {
-        }
-
         public HttpResponse Cats()
         {
             const string nameKey = "Name";
@@ -17,9 +13,13 @@
 
             var query = this.Request.Query;
 
-            var catName = query.ContainsKey(nameKey) ? query[nameKey] : "the cats";
+            var catName = query.ContainsKey(nameKey)
+                ? query[nameKey]
+                : "the cats";
 
-            var catAge = query.ContainsKey(ageKey) ? int.Parse(query[ageKey]) : 0;
+            var catAge = query.ContainsKey(ageKey)
+                ? int.Parse(query[ageKey])
+                : 0;
 
             var viewModel = new CatViewModel
             {
@@ -30,10 +30,15 @@
             return View(viewModel);
         }
 
-        public HttpResponse Dogs() => View();
+        public HttpResponse Dogs() => View(new DogViewModel
+        {
+            Name = "Rex",
+            Age = 3,
+            Breed = "Street Perfect"
+        });
 
         public HttpResponse Bunnies() => View("Rabbits");
 
-        public HttpResponse Turtles () => View("Animals/Wild/Turtles");
+        public HttpResponse Turtles() => View("Animals/Wild/Turtles");
     }
 }
