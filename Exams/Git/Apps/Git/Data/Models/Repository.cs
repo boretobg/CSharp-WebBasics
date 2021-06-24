@@ -15,7 +15,7 @@
         [MaxLength(RepositoryNameMaxLength)]
         public string Name { get; set; }
 
-        public DateTime CreatedOn { get; set; }
+        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 
         public bool IsPublic { get; set; }
 
@@ -23,6 +23,6 @@
         public string OwnerId { get; set; }
         public User Owner { get; set; }
 
-        IEnumerable<Commit> Commits { get; set; } = new HashSet<Commit>();
+        public IEnumerable<Commit> Commits { get; set; } = new HashSet<Commit>();
     }
 }

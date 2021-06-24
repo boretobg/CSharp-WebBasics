@@ -1,6 +1,7 @@
 ﻿namespace Git.Controllers
 {
     using Git.Data;
+    using Git.Data.Models;
     using Git.ViewModels;
     using SUS.HTTP;
     using SUS.MvcFramework;
@@ -18,7 +19,23 @@
             this.data = data;
         }
 
-        public HttpResponse All() => View();
+        public HttpResponse All()
+        {
+            var repos = this.data
+                .Repositories
+                .Where(x => x.IsPublic)
+                .Select(x => new RepositoryListViewModel
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Owner = x.Owner.Username,
+                    Commits = x.Commits.Count(),
+                    CreatedOn = x.CreatedOn
+                }).ToList();
+
+            return View(repos);
+        }
+
 
         public HttpResponse Create() => View();
 
@@ -38,6 +55,15 @@
 
             if (string.IsNullOrWhiteSpace(sb.ToString()))
             {
+                var repo = new Repository
+                {
+                    Name = model.Name,
+                    IsPublic = model.RepositoryType == RepositoryPublicType,
+                    OwnerId = this.GetUserId()
+                };
+
+                data.Repositories.Add(repo);
+                data.SaveChanges();
 
                 return Redirect("/Commits/All");
             }
