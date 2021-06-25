@@ -14,7 +14,6 @@
         [Required]
         public string Username { get; set; }
 
-        [MaxLength(PasswordMaxLength)]
         [Required]
         public string Password { get; set; }
 
