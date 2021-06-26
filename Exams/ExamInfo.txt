@@ -1,0 +1,82 @@
+1. Install EFCore packages (on the provided skeleton) if needed (.SqlServer, .Tools)
+2. Create folder Data
+	3. Create folder Models inside Data
+4. Create DbContext class (inhreit from DbContext) inside Data
+	5. Create db models from "2. Databse Requirements" in Models folder
+		- use {get; set;} (init for editable props - collections and Id)
+		- use [Required] on string
+		- if "Id" is string => 
+			public string Id { get; init;} = Guid.NewGuid().ToString(); 
+			Guid max lenght is 36! (//[Key])
+		- if needed put MaxLength(40) on the "Id" because of the Guid
+		- [MaxLength(n)] - MinLenght not required here
+		- for collections use IEnumarable<Model> Name {get;init;} = new List<>() or HashSet<>()
+
+(Optional) - Create class DataConstants in Data folder and use it in the db models
+		- public const int MaxLenght = 20;
+		- using static DataConstants;
+
+6. Make models properties in DbContext class (DbSet<Model> name {get;init;})
+(Optional) Add migration using Package Manager Console
+	- "Add-Migration <Name> -o Data/Migrations" (-o output directory)
+	- Make sure the current project is set to Startup Project 
+	- Go through the migrations, if somethings wrong delete the Migrations folder and make another one
+
+7. Make class HomeController in Controllers folder
+	- inherits form Controller
+
+8. Validate Layout.cshtml if needed, (like when to show login and register tabs and when not)
+	- layout is the top bar
+	- (can work with _Layout too)
+
+	- URL's can be found in the Layout.cshtml after the href
+	- for example if we have Users/Login and Users/Register we need UsersController
+
+9. Create UsersController (inherit from Controller)
+	- for example if we want register page to work: public HttpResponse Register() => View();
+
+10. In order to reveice and save the info from the register page, we need to create another class
+called "RegisterUserFormModel" located in Models/Users (another Models outside the Data folder)
+	- props names must be identical (PascalCase) as the ones in the Form Data window 
+at the Headers tab (under Network) when you press f12 on your browser
+		- can also be seen in Register.cshtml after the "name"
+	- like: public string Email {get; init;}
+
+11. We add in the UsersController - 
+	[HttpPost]
+	public HttpResponse Register(RegisterUserFormModel model)
+		=> View();
+	- that way now the model is filled with the info from the Register page in the browser
+
+12. Validation for Register 
+	- 1. Visualize the form in the UsersController (public HttpResponse Register() => View();)
+	- 2. Validate the "model" data under public HttpResponse Register(RegisterUserFormModel model)
+							=> View();
+	- 3. If there are "Any" errors return Error
+		- Error() can be found in Controller.cs in the MvcFramework
+	- 4. Else - create a new user and add it to the database (data.User.Add(user); data.SaveChanges();)
+							- create dbcontext object named data (constructor)
+	- 5. Finally return Redirect("/Users/Login");
+
+13. Hash the password with a new class in the Services folder
+	- the validation for the maxLength must be checked only in the validator, not in the db
+14. For the Login do the same as the Register (also in the UsersController)
+	- (make a model LoginUserFormModel in Models/USers)
+	- Validation is not required, just ask the db if the info is correct
+		- var hashedPassword = this.passwordHasher.HashPassword(model.Password);
+		  var user = this.data.Users.Where(u => u.Username == model.Username &&
+							u.Password == hashedPassword)
+					    .Select(u => u.Id).FirstOrDefault();
+	- if user is null - Error(msg), else - SignIn(userId) and redirecto ;
+
+If a car for example have an Owner, in the Add() method (CarsController) there should be [Authorize] attribute on both
+
+IMPORTANT: 
+You need to register evey Service you make (otherwise you get Null error) - you can add it in the Startup.cs at:
+	 public void ConfigureServices(IServiceCollection serviceCollection)
+              {
+                  serviceCollection.Add<IValidator, Validator>();
+              }
+
+
+

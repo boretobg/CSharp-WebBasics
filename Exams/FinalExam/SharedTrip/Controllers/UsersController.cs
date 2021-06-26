@@ -44,8 +44,8 @@
 
             if (errors.Any())
             {
-                //return Error(errors);
-                return Redirect("/Users/Register");
+                return Error(errors);
+                //return Redirect("/Users/Register");
             }
 
             var user = new User
