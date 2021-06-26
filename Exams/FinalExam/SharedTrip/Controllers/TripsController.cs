@@ -71,7 +71,8 @@
             return Redirect("/Trips/All");
         }
 
-        public HttpResponse Details()
+        [Authorize]
+        public HttpResponse Details(string tripId)
         {
             var tripsQuery = this.db
                 .Trips
@@ -84,10 +85,11 @@
                     StartPoint = t.StartPoint,
                     EndPoint = t.EndPoint,
                     ImagePath = t.ImagePath,
-                    DepartureTime = t.DepartureTime.ToString("dd.MM.yyyy HH:mm"),
+                    DepartureTime = t.DepartureTime.ToString("dd.MM.yyyy HH: mm"),
                     Seats = t.Seats,
                     Description = t.Description
                 })
+                .Where(x => x.Id == tripId)
                 .FirstOrDefault();
 
             if (trip == null)
@@ -98,6 +100,7 @@
             return View(trip);
         }
 
+        [Authorize]
         public HttpResponse AddUserToTrip(string tripId)
         {
             var currentTrip = db.Trips.Where(x => x.Id == tripId).FirstOrDefault();
@@ -115,9 +118,9 @@
                 User = user
             };
             
-            if (db.Users.Where(x => x.UserTrips == userTrip).Any())
+            if (db.UserTrips.Where(x => x.UserId == user.Id && x.Trip.Id == currentTrip.Id).Any())
             {
-                return Redirect("Trips/Details");
+                return Redirect($"/Trips/Details?tripId={currentTrip.Id}");
             }
 
             currentTrip.UserTrips.Add(userTrip);
