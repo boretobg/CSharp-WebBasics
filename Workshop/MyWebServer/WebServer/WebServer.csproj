@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,11 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebServer.Server\WebServer.Server.csproj" />
+    <Folder Include="wwwroot\img\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\img\" />
+    <ProjectReference Include="..\WebServer.Server\WebServer.Server.csproj" />
+    <ProjectCapability Include="SupportsSystemWeb" />
   </ItemGroup>
 
 </Project>
