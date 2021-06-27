@@ -35,11 +35,11 @@
 
             if (db.Users.Any(u => u.Username == model.Username))
             {
-                errors.Add("Username already exists.");
+                errors.Add("Username already registered.");
             }
             if (db.Users.Any(u => u.Email == model.Email))
             {
-                errors.Add("Email already exists.");
+                errors.Add("Email already registered.");
             }
 
             if (errors.Any())

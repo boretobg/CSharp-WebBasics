@@ -14,9 +14,7 @@
 
             if (model.Username.Length < UsernameMinLength || model.Username.Length > UsernameMaxLength)
             {
-                errors.Add($"Username should be between {UsernameMinLength} and {UsernameMaxLength} characters.");
-                //the first line from the errors list never shows up in the browser, when the errors are listed
-                //if I swap from example the first two if's, again the first error dont show up
+                errors.Add($"Username should be between {UsernameMinLength} and {UsernameMaxLength} characters.");   
             }
             if (model.Password.Length < PasswordMinLength || model.Password.Length > PasswordMaxLength)
             {
@@ -33,8 +31,6 @@
             if (model.Username.Length < UsernameMinLength || model.Username.Length > UsernameMaxLength)
             {
                 errors.Add($"Username should be between {UsernameMinLength} and {UsernameMaxLength} characters.");
-                //the first line from the errors list never shows up in the browser, when the errors are listed
-                //if I swap from example the first two if's, again the first error dont show up
             }
             if (!Regex.IsMatch(model.Email, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$"))
             {
